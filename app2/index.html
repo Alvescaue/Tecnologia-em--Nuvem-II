@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+   
+    <title>Formlulario de Contato</title>
+</head>
+<body>
+    <h1>Fale Conosco</h1>
+
+    <form method="post" action="">
+        <label for="nome">Nome:</label><br>
+        <input type="text" name="nome" id="nome" required><br><br>
+
+        <label for="email">Email:</label><br>
+        <input type="text" name="email" id="email" required><br><br>
+
+        <label for="mensagem">Mensagem:</label><br>
+        <Textarea name="nome" id="nome" rows="5" required></Textarea><br><br> 
+        
+        <input type="submit" value="Enviar">
+    </form>
+
+    <?php
+    if ($_SERVER["REQUEST_METHOD"]=="POST"){
+        //coleta os dados do formulario
+        $nome = htmlspecialchars($_POST["nome"]);
+        $email = htmlspecialchars($_POST["email"]);
+        $mensagem = htmlspecialchars($_POST["mensagem"]);
+
+        //Exibe os dados (em uma aplicação real, voce poderia salvar ou enviar por email)
+        echo "<h2>Dados Recebidos:</h2>";
+        echo "<p><Strong>Nome:</Strong> $nome</p>";
+        echo "<p><Strong>Email:</Strong> $email</p>";
+        echo "<p><Strong>Mensagem:</Strong> $mensagem</p>";
+    }
+
+    ?>
+
+</body>
+</html>
