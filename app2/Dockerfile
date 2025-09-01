@@ -15,7 +15,7 @@ RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
 # Corrige configuração da porta do Apache
 RUN sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf && \
-    sed -i "s/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-available/000-default.conf
+    sed -i "s/<VirtualHost \*:80>/<VirtualHost \*:${PORT}>/" /etc/apache2/sites-available/000-default.conf
 
 # Permite acesso ao diretório e ativa AllowOverride
 RUN echo '<Directory /var/www/html>' >> /etc/apache2/apache2.conf && \
