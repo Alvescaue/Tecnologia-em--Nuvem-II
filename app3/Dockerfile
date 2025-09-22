@@ -1,25 +1,31 @@
-# Imagem base oficial do PHP com Apache
-FROM php:8.1-apache
+# Usa imagem oficial do PHP com Apache
+FROM php:8.2-apache
 
-# Instala dependências necessárias (se necessário)
-RUN apt-get update && apt-get install -y \
-    vim \
-    && rm -rf /var/lib/apt/lists/*
+# Define a porta usada (por exemplo, pela Render)
+ENV PORT=8080
 
-# Habilita o mod_rewrite do Apache
+# Ativa o mod_rewrite para URLs amigáveis
 RUN a2enmod rewrite
 
-# Define o diretório de trabalho
-WORKDIR /var/www/html
-
-# Copia o código PHP para o container
+# Copia o código da aplicação
 COPY . /var/www/html/
 
-# Define a permissão de acesso para os arquivos
-RUN chown -R www-data:www-data /var/www/html
+# Corrige permissões
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
-# Expondo a porta 80, que é a porta padrão do Apache
-EXPOSE 80
+# Corrige configuração da porta do Apache
+RUN sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf && \
+    sed -i "s/<VirtualHost \*:80>/<VirtualHost \*:${PORT}>/" /etc/apache2/sites-available/000-default.conf
 
-# Comando para iniciar o Apache
+# Permite acesso ao diretório e ativa AllowOverride
+RUN echo '<Directory /var/www/html>' >> /etc/apache2/apache2.conf && \
+    echo '    Options Indexes FollowSymLinks' >> /etc/apache2/apache2.conf && \
+    echo '    AllowOverride All' >> /etc/apache2/apache2.conf && \
+    echo '    Require all granted' >> /etc/apache2/apache2.conf && \
+    echo '</Directory>' >> /etc/apache2/apache2.conf
+
+# Expõe a porta corretamente
+EXPOSE ${PORT}
+
+# Inicia o Apache no foreground
 CMD ["apache2-foreground"]
