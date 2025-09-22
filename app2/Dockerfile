@@ -1,20 +1,31 @@
-# Use a imagem oficial do PHP com Apache como base
-FROM php:8.1-apache
+# Usa imagem oficial do PHP com Apache
+FROM php:8.2-apache
 
-# Habilitar mod_rewrite (se necessário para seu caso)
+# Define a porta usada (por exemplo, pela Render)
+ENV PORT=8080
+
+# Ativa o mod_rewrite para URLs amigáveis
 RUN a2enmod rewrite
 
-# Copie os arquivos PHP para o diretório de documentos do Apache
-COPY . /var/www/php/
+# Copia o código da aplicação
+COPY . /var/www/html/
 
-# Defina o diretório de trabalho
-WORKDIR /var/www/php/
+# Corrige permissões
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
-# Permite que o Apache use o arquivo index.php
-RUN chmod -R 755 /var/www/html/
+# Corrige configuração da porta do Apache
+RUN sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf && \
+    sed -i "s/<VirtualHost \*:80>/<VirtualHost \*:${PORT}>/" /etc/apache2/sites-available/000-default.conf
 
-# Exponha a porta padrão para o Apache (porta 80)
-EXPOSE 80
+# Permite acesso ao diretório e ativa AllowOverride
+RUN echo '<Directory /var/www/html>' >> /etc/apache2/apache2.conf && \
+    echo '    Options Indexes FollowSymLinks' >> /etc/apache2/apache2.conf && \
+    echo '    AllowOverride All' >> /etc/apache2/apache2.conf && \
+    echo '    Require all granted' >> /etc/apache2/apache2.conf && \
+    echo '</Directory>' >> /etc/apache2/apache2.conf
 
-# Inicie o Apache em modo foreground
+# Expõe a porta corretamente
+EXPOSE ${PORT}
+
+# Inicia o Apache no foreground
 CMD ["apache2-foreground"]
